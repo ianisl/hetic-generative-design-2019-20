@@ -6,7 +6,7 @@ function setup() {
     s = {};
     s.agentCount = 20;
     s.bgColor = color(33);
-    s.agentColor = color(200);
+    s.agentColor = color(200, 50);
     agents = [];
     for (let i = 0; i < s.agentCount; i++) {
         agents.push(new Agent());
@@ -15,31 +15,35 @@ function setup() {
 }
 
 function draw() {
-    background(s.bgColor);
+    // background(s.bgColor);
     for (let i = 0; i < s.agentCount; i++) {
         let a = agents[i];
         a.updatePosition();
     }
-    noStroke();
-    fill(s.agentColor);
+    stroke(s.agentColor);
+    noFill();
     for (let i = 0; i < s.agentCount; i++) {
         let a = agents[i];
-        ellipse(a.position.x, a.position.y, 10, 10);
+        strokeWeight(10);
+        line(a.previousPosition.x, a.previousPosition.y, a.position.x, a.position.y);
     }
 }
 
 class Agent {
     constructor(position) {
         this.position = position !== undefined ? position : createVector(random(width), random(height)); // Si aucune position n'est fournie, initialisation avec une position aléatoire
+        this.previousPosition = this.position.copy();
         this.xIncrement = random(-2, 2);
         this.yIncrement = random(-2, 2);
     }
     updatePosition() {
         // Une méthode mettant à jour de la position de l'agent en fonction de son angle actuel
+        this.previousPosition = this.position.copy();
         this.position.x += this.xIncrement;
         this.position.y += this.yIncrement;
         if (this.isOutsideSketch() > 0) {
             this.position = createVector(random(width), random(height));
+            this.previousPosition = this.position.copy();
         }
     }
     isOutsideSketch() {

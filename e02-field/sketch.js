@@ -4,9 +4,11 @@ let agents;
 function setup() {
     createCanvas(540, 540);
     s = {};
+    s.noiseIntensity = 255;
+    s.noiseScale = 300;
     s.agentCount = 20;
     s.bgColor = color(33);
-    s.agentColor = color(200);
+    s.agentColor = color(200, 50);
     agents = [];
     for (let i = 0; i < s.agentCount; i++) {
         agents.push(new Agent());
@@ -14,32 +16,47 @@ function setup() {
     background(s.bgColor);
 }
 
+function drawPerlinValues() {
+    for (let i = 0; i < width; i++) {
+        for (let j = 0; j < height; j++) {
+            let v = noise(i / s.noiseScale, j / s.noiseScale);
+            stroke(v * s.noiseIntensity);
+            point(i, j);
+        }
+    }
+}
+
 function draw() {
-    background(s.bgColor);
+    // background(s.bgColor);
     for (let i = 0; i < s.agentCount; i++) {
         let a = agents[i];
+        a.angle = noise(a.position.x / s.noiseScale, a.position.y / s.noiseScale) * s.noiseIntensity;
         a.updatePosition();
     }
-    noStroke();
-    fill(s.agentColor);
+    stroke(s.agentColor);
+    noFill();
     for (let i = 0; i < s.agentCount; i++) {
         let a = agents[i];
-        ellipse(a.position.x, a.position.y, 10, 10);
+        strokeWeight(10);
+        line(a.previousPosition.x, a.previousPosition.y, a.position.x, a.position.y);
     }
 }
 
 class Agent {
     constructor(position) {
         this.position = position !== undefined ? position : createVector(random(width), random(height)); // Si aucune position n'est fournie, initialisation avec une position aléatoire
-        this.xIncrement = random(-2, 2);
-        this.yIncrement = random(-2, 2);
+        this.previousPosition = this.position.copy();
+        this.angle = random(TWO_PI);
+        this.stepSize = 2;
     }
     updatePosition() {
         // Une méthode mettant à jour de la position de l'agent en fonction de son angle actuel
-        this.position.x += this.xIncrement;
-        this.position.y += this.yIncrement;
+        this.previousPosition = this.position.copy();
+        this.position.x += cos(this.angle) * this.stepSize;
+        this.position.y += sin(this.angle) * this.stepSize;
         if (this.isOutsideSketch() > 0) {
             this.position = createVector(random(width), random(height));
+            this.previousPosition = this.position.copy();
         }
     }
     isOutsideSketch() {
@@ -62,3 +79,4 @@ class Agent {
         }
     }
 }
+
